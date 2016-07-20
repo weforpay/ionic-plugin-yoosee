@@ -1,0 +1,14 @@
+
+
+typedef enum{
+    P2PCALL_TYPE_MONITOR,
+    P2PCALL_TYPE_VIDEO,
+    P2PCALL_TYPE_PLAYBACK
+} P2PCallType;
+
+typedef enum{
+    P2PCALL_STATUS_NONE,
+    P2PCALL_STATUS_CALLING,
+    P2PCALL_STATUS_READY_P2P,
+} P2PCallState;
+
