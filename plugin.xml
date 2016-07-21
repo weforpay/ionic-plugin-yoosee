@@ -66,6 +66,12 @@
                 <param name="ios-package" value="yoosee" onload="true" />
             </feature>
         </config-file>
+
+        <config-file platform="ios" target="project.pbxproj">
+            <build-property name="ENABLE_BITCODE" value="NO" />
+        </config-file>
+
+
         <header-file src="src/ios/yoosee.h"/>
         <source-file src="src/ios/yoosee.m"/>
         <header-file src="src/ios/ViewController.h"/>
@@ -92,6 +98,8 @@
         <source-file src="src/ios/P2P/Files/libAVCtrl_armv7.a" framework="true" compiler-flags="-objc" target-dir="P2P/Files" />
         <source-file src="src/ios/P2P/Files/libAVCtrl_armv7s.a" framework="true" compiler-flags="-objc" target-dir="P2P/Files" />
         <source-file src="src/ios/P2P/Files/libAVCtrl_i386.a" framework="true" compiler-flags="-objc" target-dir="P2P/Files" />
+        
+        <resource-file src="src/ios/Main.storyBoard" target-dir="en.lproj"/>
         
         <framework src="QuartzCore.framework" weak="true"/>
         <framework src="AVFoundation.framework" weak="true"/>

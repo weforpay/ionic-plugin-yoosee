@@ -21,6 +21,7 @@
 
 #import <Cordova/CDV.h>
 #import "yoosee.h"
+#import "ViewController.h"
 
 @interface yoosee () {}
 @end
@@ -32,10 +33,13 @@
     NSString* callId = [command.arguments objectAtIndex:0];
     NSString* callPwd = [command.arguments objectAtIndex:1];
     NSString* title = [command.arguments objectAtIndex:2];
-    ViewController* monitorViewer = [[ViewController alloc] init];
+    
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    ViewController* monitorViewer = [storyboard instantiateViewControllerWithIdentifier:@"Main"];
     [self.viewController presentViewController:monitorViewer animated:YES completion:nil];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+
 }
 
 @end
