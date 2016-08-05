@@ -1,6 +1,6 @@
 package com.weforpay.plugin.yoosee;
 
-import {{.pageName}}.R;
+import com.u.telecare.k10app.R;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,8 +38,8 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         super.onResume();
         pView = (P2PView) findViewById(R.id.pview);
         initP2PView(7);
-        setMute(true);  //设置手机静音
-        P2PHandler.getInstance().openAudioAndStartPlaying(1);//打开音频并准备播放，calllType与call时type一致
+        setMute(true);  //璁剧疆鎵嬫満闈欓煶
+        P2PHandler.getInstance().openAudioAndStartPlaying(1);//鎵撳紑闊抽骞跺噯澶囨挱鏀撅紝calllType涓巆all鏃秚ype涓�鑷�
         Bundle b = this.getIntent().getExtras();
         if(b != null){
         	this.userId = b.getString("userId");
@@ -82,9 +82,13 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
 
     }
     void connect(){
-        pwd = P2PHandler.getInstance().EntryPassword(callPwd);//缁忚繃杞崲鍚庣殑璁惧瀵嗙爜
+        pwd = P2PHandler.getInstance().EntryPassword(callPwd);//缂佸繗绻冩潪顒佸床閸氬海娈戠拋鎯ь槵鐎靛棛鐖�
         
-        P2PHandler.getInstance().call(userId, pwd, true, 1,callId, "", "", 2,callId);
+        try{
+            P2PHandler.getInstance().call(userId, pwd, true, 1,callId, "", "", 2,callId);        	
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
     	this.connected = false;
     }
     @Override
