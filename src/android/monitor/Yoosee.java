@@ -20,6 +20,7 @@ public class Yoosee extends CordovaPlugin {
 	
 	final static String ACTION_LOOK_OK = "yoosee.look.ok";
 	final static String ACTION_LOOK_FAIL = "yoosee.look.fail";
+	final static String ACTION_LOOK_CANCEL = "yoosee.look.cancel";
 	
 	boolean mInited = false;
 	@Override
@@ -79,13 +80,17 @@ public class Yoosee extends CordovaPlugin {
 	 public BroadcastReceiver mReceiver = new BroadcastReceiver() {
 	        @Override
 	        public void onReceive(Context context, Intent intent) {
-	            if(intent.getAction().equals("yoosee.look.ok")){
+	            if(intent.getAction().equals(ACTION_LOOK_OK)){
 	            	if(mSeeCallback != null){
 	            		mSeeCallback.success();
 	            	}
-	            }else if(intent.getAction().equals("yoosee.look.fail")){
+	            }else if(intent.getAction().equals(ACTION_LOOK_FAIL)){
 	            	if(mSeeCallback != null){
-	            		mSeeCallback.error(-1);
+	            		mSeeCallback.error(1);
+	            	}
+	            }else if(intent.getAction().equals(ACTION_LOOK_CANCEL)){
+	            	if(mSeeCallback != null){
+	            		mSeeCallback.error(2);
 	            	}
 	            }
 	        }
@@ -93,7 +98,8 @@ public class Yoosee extends CordovaPlugin {
     public void regFilter() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Yoosee.ACTION_LOOK_OK);
-        filter.addAction(Yoosee.ACTION_LOOK_FAIL);        
+        filter.addAction(Yoosee.ACTION_LOOK_FAIL);
+        filter.addAction(Yoosee.ACTION_LOOK_CANCEL);     
         this.mContext.registerReceiver(mReceiver, filter);
     }
 }

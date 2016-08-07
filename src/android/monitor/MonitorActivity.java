@@ -107,6 +107,7 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
     public void onPause(){
     	super.onPause();
 		P2PHandler.getInstance().reject();
+		broadcastResult(2);
     }
 
 	@Override
@@ -114,13 +115,17 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         super.onDestroy();
         unregisterReceiver(mReceiver);
     }
-	void broadcastResult(boolean ok){
+	void broadcastResult(int status){
 		Intent intent = new Intent();
-		if(ok){
+		if(status == 0){
 			intent.setAction(Yoosee.ACTION_LOOK_OK);
 			this.sendBroadcast(intent);
-		}else{
+		}else if(status == 1){
 			intent.setAction(Yoosee.ACTION_LOOK_FAIL);
+			this.sendBroadcast(intent);
+			this.finish();
+		}else if(status == 2){
+			intent.setAction(Yoosee.ACTION_LOOK_CANCEL);
 			this.sendBroadcast(intent);
 			this.finish();
 		}
@@ -132,11 +137,11 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(P2P_ACCEPT)){
             	MonitorActivity.this.connected = true;
-            	broadcastResult(true);
+            	broadcastResult(0);
             }else if(intent.getAction().equals(P2P_READY)){
             }else if(intent.getAction().equals(P2P_REJECT)){
             	if(mConnectTryTimes > 2){
-            		broadcastResult(false);
+            		broadcastResult(1);
             		return;
             	}
             	if(MonitorActivity.this.connected == false){
