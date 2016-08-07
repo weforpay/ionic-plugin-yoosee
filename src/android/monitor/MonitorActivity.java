@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import com.p2p.core.BaseMonitorActivity;
@@ -22,12 +23,14 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
     public static String P2P_REJECT = "com.yoosee.P2P_REJECT";
     private String userId,pwd,callId,callPwd;
     boolean connected = false;
+    
+    Handler mHandler = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monito);
-        
         regFilter();
+        this.mHandler = new Handler();
     }
 
    
@@ -84,11 +87,7 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
     void connect(){
         pwd = P2PHandler.getInstance().EntryPassword(callPwd);//缂佸繗绻冩潪顒佸床閸氬海娈戠拋鎯ь槵鐎靛棛鐖�
         
-        try{
-            P2PHandler.getInstance().call(userId, pwd, true, 1,callId, "", "", 2,callId);        	
-        }catch(Exception e){
-        	e.printStackTrace();
-        }
+        P2PHandler.getInstance().call(userId, pwd, true, 1,callId, "", "", 2,callId);
     	this.connected = false;
     }
     @Override
@@ -115,18 +114,44 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         super.onDestroy();
         unregisterReceiver(mReceiver);
     }
-
+	void broadcastResult(boolean ok){
+		Intent intent = new Intent();
+		if(ok){
+			intent.setAction(Yoosee.ACTION_LOOK_OK);
+			this.sendBroadcast(intent);
+		}else{
+			intent.setAction(Yoosee.ACTION_LOOK_FAIL);
+			this.sendBroadcast(intent);
+			this.finish();
+		}
+		
+	}
+	int mConnectTryTimes = 0;
     public BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(P2P_ACCEPT)){
             	MonitorActivity.this.connected = true;
+            	broadcastResult(true);
             }else if(intent.getAction().equals(P2P_READY)){
             }else if(intent.getAction().equals(P2P_REJECT)){
-            	if(MonitorActivity.this.connected == false){
-            		MonitorActivity.this.connect();
-            		Log.d(TAG, "recalling");
+            	if(mConnectTryTimes > 2){
+            		broadcastResult(false);
+            		return;
             	}
+            	if(MonitorActivity.this.connected == false){
+            		mHandler.postDelayed(new Runnable(){
+
+						@Override
+						public void run() {
+							MonitorActivity.this.connect();
+	                		mConnectTryTimes ++;   
+						}
+                		         			
+            		}, 1000);
+            		Log.d(TAG, "recalling");
+            	}            	
+            	
             }
         }
     };
