@@ -241,12 +241,15 @@
     _isReject=YES;
     if(_connectTryTimes > 2){
         _seeResult(1);
+        dispatch_async(dispatch_get_main_queue(), ^(){
+            [self back:nil];
+        });
         return ;
     }
     _connectTryTimes ++;
     
     if(_startingMonitor){
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self startMoni:nil];
         });
     }
