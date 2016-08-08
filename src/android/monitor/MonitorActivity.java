@@ -1,11 +1,12 @@
 package com.weforpay.plugin.yoosee;
 
-import {{.pageName}}.R;
+import com.u.telecare.k10app.R;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import com.p2p.core.BaseMonitorActivity;
@@ -22,12 +23,14 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
     public static String P2P_REJECT = "com.yoosee.P2P_REJECT";
     private String userId,pwd,callId,callPwd;
     boolean connected = false;
+    
+    Handler mHandler = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monito);
-        
         regFilter();
+        this.mHandler = new Handler();
     }
 
    
@@ -38,8 +41,8 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         super.onResume();
         pView = (P2PView) findViewById(R.id.pview);
         initP2PView(7);
-        setMute(true);  //设置手机静音
-        P2PHandler.getInstance().openAudioAndStartPlaying(1);//打开音频并准备播放，calllType与call时type一致
+        setMute(true);  //璁剧疆鎵嬫満闈欓煶
+        P2PHandler.getInstance().openAudioAndStartPlaying(1);//鎵撳紑闊抽骞跺噯澶囨挱鏀撅紝calllType涓巆all鏃秚ype涓�鑷�
         Bundle b = this.getIntent().getExtras();
         if(b != null){
         	this.userId = b.getString("userId");
@@ -82,7 +85,7 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
 
     }
     void connect(){
-        pwd = P2PHandler.getInstance().EntryPassword(callPwd);//缁忚繃杞崲鍚庣殑璁惧瀵嗙爜
+        pwd = P2PHandler.getInstance().EntryPassword(callPwd);//缂佸繗绻冩潪顒佸床閸氬海娈戠拋鎯ь槵鐎靛棛鐖�
         
         P2PHandler.getInstance().call(userId, pwd, true, 1,callId, "", "", 2,callId);
     	this.connected = false;
@@ -104,6 +107,7 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
     public void onPause(){
     	super.onPause();
 		P2PHandler.getInstance().reject();
+		broadcastResult(2);
     }
 
 	@Override
@@ -111,18 +115,48 @@ public class MonitorActivity extends BaseMonitorActivity implements View.OnClick
         super.onDestroy();
         unregisterReceiver(mReceiver);
     }
-
+	void broadcastResult(int status){
+		Intent intent = new Intent();
+		if(status == 0){
+			intent.setAction(Yoosee.ACTION_LOOK_OK);
+			this.sendBroadcast(intent);
+		}else if(status == 1){
+			intent.setAction(Yoosee.ACTION_LOOK_FAIL);
+			this.sendBroadcast(intent);
+			this.finish();
+		}else if(status == 2){
+			intent.setAction(Yoosee.ACTION_LOOK_CANCEL);
+			this.sendBroadcast(intent);
+			this.finish();
+		}
+		
+	}
+	int mConnectTryTimes = 0;
     public BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(P2P_ACCEPT)){
             	MonitorActivity.this.connected = true;
+            	broadcastResult(0);
             }else if(intent.getAction().equals(P2P_READY)){
             }else if(intent.getAction().equals(P2P_REJECT)){
-            	if(MonitorActivity.this.connected == false){
-            		MonitorActivity.this.connect();
-            		Log.d(TAG, "recalling");
+            	if(mConnectTryTimes > 2){
+            		broadcastResult(1);
+            		return;
             	}
+            	if(MonitorActivity.this.connected == false){
+            		mHandler.postDelayed(new Runnable(){
+
+						@Override
+						public void run() {
+							MonitorActivity.this.connect();
+	                		mConnectTryTimes ++;   
+						}
+                		         			
+            		}, 1000);
+            		Log.d(TAG, "recalling");
+            	}            	
+            	
             }
         }
     };
