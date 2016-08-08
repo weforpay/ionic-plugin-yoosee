@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--look-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="Main" id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="Main" title="look" modalPresentationStyle="pageSheet" id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -16,71 +16,10 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f7S-mZ-oa1">
-                                <rect key="frame" x="9" y="219" width="74" height="27"/>
-                                <color key="backgroundColor" red="1" green="0.5891501093" blue="0.60977594999999996" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="开始监控"/>
-                                <connections>
-                                    <action selector="startMoni:" destination="BYZ-38-t0r" eventType="touchUpInside" id="VgL-cx-SCI"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DSU-MF-MgN">
-                                <rect key="frame" x="91" y="219" width="74" height="27"/>
-                                <color key="backgroundColor" red="1" green="0.5891501093" blue="0.60977594999999996" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="停止监控"/>
-                                <connections>
-                                    <action selector="stopMoni:" destination="BYZ-38-t0r" eventType="touchUpInside" id="DeC-MS-QUN"/>
-                                </connections>
-                            </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" editable="NO" text="操作日志" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yGQ-6y-35b">
-                                <rect key="frame" x="10" y="254" width="301" height="306"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
-                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZXu-7Z-16j">
-                                <rect key="frame" x="0.0" y="209" width="320" height="2"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="1" id="w4e-bJ-BxR"/>
-                                </constraints>
-                            </view>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5GI-qC-Qpd">
-                                <rect key="frame" x="255" y="219" width="45" height="27"/>
-                                <color key="backgroundColor" red="1" green="0.93138944150000003" blue="0.087719167370000004" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="重登"/>
-                                <connections>
-                                    <action selector="reLogin:" destination="BYZ-38-t0r" eventType="touchUpInside" id="C58-X7-Tdt"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BWb-yr-ubo">
-                                <rect key="frame" x="173" y="219" width="74" height="27"/>
-                                <color key="backgroundColor" red="1" green="0.93138944150000003" blue="0.087719167370000004" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="清空日志"/>
-                                <connections>
-                                    <action selector="ClearTheLog:" destination="BYZ-38-t0r" eventType="touchUpInside" id="w7F-3d-2Vf"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="ZXu-7Z-16j" secondAttribute="trailing" id="041-UF-Lny"/>
-                            <constraint firstItem="f7S-mZ-oa1" firstAttribute="top" secondItem="ZXu-7Z-16j" secondAttribute="bottom" constant="8" id="4wG-Wc-HWi"/>
-                            <constraint firstItem="yGQ-6y-35b" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="CfG-jP-tCU"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="yGQ-6y-35b" secondAttribute="bottom" constant="8" id="NlC-c1-Ok0"/>
-                            <constraint firstAttribute="trailing" secondItem="yGQ-6y-35b" secondAttribute="trailing" constant="10" id="X86-h6-csX"/>
-                            <constraint firstItem="yGQ-6y-35b" firstAttribute="top" secondItem="DSU-MF-MgN" secondAttribute="bottom" constant="8" id="Zf7-wK-cXh"/>
-                            <constraint firstItem="5GI-qC-Qpd" firstAttribute="top" secondItem="ZXu-7Z-16j" secondAttribute="bottom" constant="8" id="eIa-GF-9sh"/>
-                            <constraint firstItem="BWb-yr-ubo" firstAttribute="top" secondItem="ZXu-7Z-16j" secondAttribute="bottom" constant="8" id="hTE-Zf-4Vc"/>
-                            <constraint firstItem="DSU-MF-MgN" firstAttribute="top" secondItem="ZXu-7Z-16j" secondAttribute="bottom" constant="8" id="l8Z-hU-nlH"/>
-                            <constraint firstItem="ZXu-7Z-16j" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="uSg-71-0lc"/>
-                            <constraint firstItem="ZXu-7Z-16j" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="189" id="wxD-4z-8Z4"/>
-                        </constraints>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
-                    <connections>
-                        <outlet property="logs" destination="yGQ-6y-35b" id="fkz-JG-Zfi"/>
-                    </connections>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

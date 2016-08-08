@@ -10,7 +10,7 @@
 /**
  ----------我是萌萌哒的分割线----------
  
-            化繁为简,一如既往!
+ 化繁为简,一如既往!
  
  本demo只演示如何使用p2p库去视频监控,不演示任何跟视频监控无关的操作
  因为视频监控往往是一对一的,所以基本不使用全局消息的通知方式,转而使用协议和代理
@@ -22,7 +22,7 @@
  */
 
 /*
-                        ---看这里---
+ ---看这里---
  本来这个demo对设备的密码是不需要使用加密算法的,是推荐使用纯数字密码的,但奈何设备那边毕竟有字母密码,所以现在加入对字母密码的支持
  很简单,使用Utils.h文件里的 GetTreatedPassword:(NSString*)sPassword 方法就能把带字母的密码加密成数字传给设备,对了,它返回
  的不是NSString类型,记得把它转换成NSString类型呀
@@ -38,16 +38,27 @@
 //以下是 用户账号密码 设备id和密码,不保证一直有用,请使用您自己的账号密码和设备
 #define UserName @"13420984014"
 #define UserPswd @"123456"
-#define DeviceId @"2946367"
-#define DevicePw @"weforpay8"
+//#define DeviceId @"2946367"
+//#define DevicePw @"weforpay8"
+
 
 @interface ViewController ()<P2PClientDelegate>{
     NSString* _p2pcode1;
     NSString* _p2pcode2;
     NSString* _userIDName;//用户的id号
+    
+    NSString* DeviceId;
+    NSString* DevicePw;
+    SeeResultCb _seeResult;
+    
+    BOOL _startingMonitor;
+    BOOL _looking ;
+    
     BOOL _hadInitDevice;//是否连接设备
     BOOL _hadLogin;//是否成功登录
     BOOL _isReject;//是否挂断了
+    
+    int _connectTryTimes;
     
     OpenGLView* _remoteView;//监控画面
     
@@ -58,16 +69,24 @@
      */
     NSArray<NSString*>* _errorStrings;
     
+    
 }
-@property (weak, nonatomic) IBOutlet UITextView *logs;
 
 @end
 
+
+
 @implementation ViewController
+
+@synthesize deviceId = DeviceId;
+@synthesize devicePwd = DevicePw;
+@synthesize seeResult=_seeResult;
+
 -(void)createMonitoView{
-    CGFloat h=170;
-    CGFloat w=h*16/9;
-    CGRect rect=CGRectMake(5, 20,w, h);
+    CGRect screenRt = [[UIScreen mainScreen] bounds];
+    CGFloat w=screenRt.size.width;
+    CGFloat h=w*9/16;
+    CGRect rect=CGRectMake(0,(screenRt.size.height-h)/2,w, h);
     _remoteView=[[OpenGLView alloc] init];
     _remoteView.frame=rect;
     _remoteView.backgroundColor=[UIColor blackColor];
@@ -77,6 +96,9 @@
     [super viewDidLoad];
     [self createMonitoView];
     _isReject=YES;
+    _looking = NO;
+    _connectTryTimes = 0;
+    
     _errorStrings=@[
                     @"没有发生错误",
                     @"对方的ID 被禁用",
@@ -95,9 +117,66 @@
                     @"连接不支持"
                     ];
     
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:)
+                                                 name:UIApplicationWillResignActiveNotification object:nil]; //监听是否触发home键挂起程序.
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification object:nil]; //监听是否重新进入程序程序.
+    
+    [self setNavigationbar];
     [self startLogin];//开始登录
     [[P2PClient sharedClient] setDelegate:self];
     
+}
+
+- (void)applicationWillResignActive:(NSNotification *)notification
+
+{
+    _connectTryTimes = 0;
+    _startingMonitor = false;
+    _looking = false;
+    _hadInitDevice = false;
+    _hadLogin = false;
+    _isReject = false;
+    
+    [self stopMoni:nil];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+    [self startLogin];
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    if(_startingMonitor){
+        _seeResult(2);
+    }
+    if(_looking){
+        [self stopMoni:nil];
+    }
+}
+- (void)setNavigationbar
+{
+    CGRect screenRect = [[UIScreen mainScreen] bounds];
+    UINavigationBar *navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, screenRect.size.width, 54)];
+    
+    //创建UINavigationItem
+    UINavigationItem * navigationBarTitle = [[UINavigationItem alloc] initWithTitle:self.title];
+    [navigationBar pushNavigationItem: navigationBarTitle animated:YES];
+    [self.view addSubview: navigationBar];
+    //创建UIBarButton 可根据需要选择适合自己的样式
+    UIBarButtonItem *item = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(back:)];
+    //设置barbutton
+    navigationBarTitle.leftBarButtonItem = item;
+    [navigationBar setItems:[NSArray arrayWithObject: navigationBarTitle]];
+    
+}
+
+- (IBAction)back:(UIButton *)sender {
+    [self dismissViewControllerAnimated:YES completion:^{
+        
+    }];
 }
 - (IBAction)reLogin:(UIButton *)sender {
     [self startLogin];
@@ -106,6 +185,9 @@
 - (IBAction)startMoni:(UIButton *)sender {
     if (_isReject&&_hadLogin&&_hadInitDevice) {
         [self addLogs:@"发送呼叫命令"];
+        
+        _startingMonitor = true;
+        
         [[P2PClient sharedClient] setIsBCalled:NO];
         [[P2PClient sharedClient] setP2pCallState:P2PCALL_STATUS_CALLING];
         
@@ -123,23 +205,11 @@
     }
 }
 - (IBAction)ClearTheLog:(UIButton *)sender {
-    _logs.text=@"操作日志";
 }
 
 
 -(void)addLogs:(NSString*)str{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* tempStr=_logs.text;
-        tempStr=[tempStr stringByAppendingString:@"\n"];
-        tempStr=[tempStr stringByAppendingString:str];
-        
-        _logs.text=tempStr;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)1000*NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
-            NSInteger len=_logs.text.length;
-            NSRange range=NSMakeRange(len-1-2, 1);
-            [_logs scrollRangeToVisible:range];
-        });
-    });
+    NSLog(str);
 }
 
 -(void)connectDevice{
@@ -149,11 +219,16 @@
             _hadInitDevice=[[P2PClient sharedClient] p2pConnectWithId:_userIDName codeStr1:_p2pcode1 codeStr2:_p2pcode2];
             NSString* result=[NSString stringWithFormat:@"初始化连接设备 %@",_hadInitDevice?@"成功,你可以操作设备了":@"失败,你将不能操作设备"];
             [self addLogs:result];
+            if(_hadInitDevice){
+                [self startMoni:nil];
+            }
         }
     }
 }
 
-
+-(IBAction)unwindSegueToSelf:(UIStoryboardSegue*)segue{
+    
+}
 
 #pragma mark - 协议的实现
 - (void)P2PClientCalling:(NSDictionary*)info{
@@ -164,18 +239,34 @@
 }
 - (void)P2PClientReject:(NSDictionary*)info{
     _isReject=YES;
+    if(_connectTryTimes > 2){
+        _seeResult(1);
+        return ;
+    }
+    _connectTryTimes ++;
+    
+    if(_startingMonitor){
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self startMoni:nil];
+        });
+    }
+    
     NSString* str=[NSString stringWithFormat:@"视频挂断,%@,解释:%@",
                    [self stringFromDic:info],
                    [self stringErrorByError:[info[@"ErrorOption"] integerValue]]];
     [self addLogs:str];
 }
 - (void)P2PClientAccept:(NSDictionary*)info{
+    _startingMonitor = false;
+    _looking = YES;
+    _seeResult(0);
     NSString* str=[NSString stringWithFormat:@"接收数据,%@,解释:%@",
                    [self stringFromDic:info],
                    [self stringErrorByError:[info[@"ErrorOption"] integerValue]]];
     [self addLogs:str];
 }
 - (void)P2PClientReady:(NSDictionary*)info{
+    _startingMonitor = false;
     NSString* str=[NSString stringWithFormat:@"准备就绪,%@,解释:%@",
                    [self stringFromDic:info],
                    [self stringErrorByError:[info[@"ErrorOption"] integerValue]]];

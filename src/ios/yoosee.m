@@ -6,9 +6,9 @@
  to you under the Apache License, Version 2.0 (the
  "License"); you may not use this file except in compliance
  with the License.  You may obtain a copy of the License at
-
+ 
  http://www.apache.org/licenses/LICENSE-2.0
-
+ 
  Unless required by applicable law or agreed to in writing,
  software distributed under the License is distributed on an
  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,16 +30,40 @@
 - (void)see:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"see");
-    NSString* callId = [command.arguments objectAtIndex:0];
-    NSString* callPwd = [command.arguments objectAtIndex:1];
-    NSString* title = [command.arguments objectAtIndex:2];
+    NSString* callId = [[command.arguments objectAtIndex:0] copy];
+    NSString* callPwd = [[command.arguments objectAtIndex:1] copy];
+    NSString* title = [[command.arguments objectAtIndex:2] copy];
+    NSString* callbackId = [command.callbackId copy];
     
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     ViewController* monitorViewer = [storyboard instantiateViewControllerWithIdentifier:@"Main"];
+    monitorViewer.deviceId = callId;
+    monitorViewer.devicePwd = callPwd;
+    monitorViewer.title = title;
+    monitorViewer.seeResult = ^(int status){
+        
+        CDVPluginResult* result = nil;
+        switch (status) {
+            case 0:
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:status];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                break;
+            case 1:
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:status];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                break;
+            case 2:
+                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:status];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                break;
+            default:
+                break;
+        }
+    };
     [self.viewController presentViewController:monitorViewer animated:YES completion:nil];
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-
+    
+    
 }
+
 
 @end
